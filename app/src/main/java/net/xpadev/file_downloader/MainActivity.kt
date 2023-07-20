@@ -9,9 +9,10 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.Data
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             if (!saveValue(value)){
                 return@setOnClickListener;
             }
-            val request = OneTimeWorkRequestBuilder<SyncWorker>().apply {
+            val request = PeriodicWorkRequestBuilder<SyncWorker>(15,TimeUnit.MINUTES).apply {
                 val data = Data.Builder().apply {
                     putString("endpoint", value)
                 }.build()
