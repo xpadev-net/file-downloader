@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import android.util.Log
-import java.lang.Error
+
 
 class StorageUtils (private val applicationContext: Context) {
     private var _storageManager: StorageManager = applicationContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
@@ -32,5 +32,12 @@ class StorageUtils (private val applicationContext: Context) {
             }
         }
         return Result.failure(Error("target disk not found"))
+    }
+
+    fun tryCleanup(){
+        val launchIntent = applicationContext.packageManager.getLaunchIntentForPackage("com.google.android.apps.photos")
+        if (launchIntent != null) {
+            applicationContext.startActivity(launchIntent)
+        }
     }
 }
