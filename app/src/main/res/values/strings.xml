@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">file-downloader</string>
+    <string name="targetlistapi_endpoint">TargetListApi Endpoint</string>
+    <string name="startprocess">StartProcess</string>
+    <string name="save">Save</string>
+</resources>
