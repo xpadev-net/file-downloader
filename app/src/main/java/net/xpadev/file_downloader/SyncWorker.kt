@@ -8,12 +8,19 @@ import net.xpadev.file_downloader.structure.TargetListResponse
 
 class SyncWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);
+    private var storage: StorageUtils = StorageUtils(applicationContext);
+
 
     override fun doWork(): Result {
-        Log.i("SyncService", "init")
+        Log.i("SyncWorker", "init")
         val endpoint = inputData.getString("endpoint") ?: return Result.failure();
         val res = this.network.fetchJson<TargetListResponse>(endpoint)
         for (item in res.data){
+            var spaceLeft = storage.getFreeBytes();
+            while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
+                spaceLeft = storage.getFreeBytes();
+                Thread.sleep(10000L)
+            }
             val result = this.network.download(item.link)
             if (result.isFailure){
                 continue;
