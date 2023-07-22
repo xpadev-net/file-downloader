@@ -35,9 +35,6 @@ class StorageUtils (private val applicationContext: Context) {
     }
 
     fun tryCleanup(){
-        val launchIntent = applicationContext.packageManager.getLaunchIntentForPackage("com.google.android.apps.photos")
-        if (launchIntent != null) {
-            applicationContext.startActivity(launchIntent)
-        }
+
     }
 }

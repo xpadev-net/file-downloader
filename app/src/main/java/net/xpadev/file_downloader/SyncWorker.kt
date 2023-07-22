@@ -19,7 +19,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
     override suspend fun doWork(): Result {
         Log.i("SyncWorker", "init")
         storage.tryCleanup()
-        /*val endpoint = inputData.getString("endpoint") ?: return Result.failure();
+        val endpoint = inputData.getString("endpoint") ?: return Result.failure();
         setForeground(createForegroundInfo("loading metadata"))
         val res = this.network.fetchJson<TargetListResponse>(endpoint)
         for (item in res.data){
@@ -36,7 +36,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
             }
             this.network.fetchString("${res.markAsComplete}?id=${item.id}")
         }
-        setForeground(createForegroundInfo("success"))*/
+        setForeground(createForegroundInfo("success"))
         return Result.success()
     }
 
