@@ -14,7 +14,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
@@ -26,6 +25,18 @@ class MainActivity : AppCompatActivity() {
     private val manager = WorkManager.getInstance()
     private lateinit var sharedPref: SharedPreferences
     private val REQUEST_CODE = 1
+    private val encrypt = EncryptionUtils()
+    override fun onStart() {
+        super.onStart()
+
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        if(account != null) {
+            Log.i("Main",account.account.toString())
+            Log.i("Main",account.id.toString())
+            Log.i("Main",account.idToken.toString())
+            Log.i("Main",account.serverAuthCode.toString())
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,15 +46,18 @@ class MainActivity : AppCompatActivity() {
         val saveButton = findViewById<Button>(R.id.SaveButton)
         val authButton = findViewById<Button>(R.id.gcp_auth)
         val targetListApiEndpointInput = findViewById<EditText>(R.id.targetListApiEndpointInput)
-        val gcp_clientIdInput = findViewById<EditText>(R.id.gcp_client_id)
+        val gcpClientIdInput = findViewById<EditText>(R.id.gcp_client_id)
+        val gcpClientSecretInput = findViewById<EditText>(R.id.gcp_client_secret)
 
         targetListApiEndpointInput.setText(this.sharedPref.getString("endpoint", ""))
+        gcpClientIdInput.setText(encrypt.decrypt(this.sharedPref.getString("gcp_clientId", "")))
+        gcpClientSecretInput.setText(encrypt.decrypt(this.sharedPref.getString("gcp_clientSecret", "")))
         Log.i("Main", "init")
 
         startProcessButton.setOnClickListener {
             Log.i("Main", "pressed")
             val value = targetListApiEndpointInput.text.toString()
-            if (!saveValue(value)){
+            if (!save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString())){
                 return@setOnClickListener;
             }
             val request = PeriodicWorkRequestBuilder<SyncWorker>(15,TimeUnit.MINUTES).apply {
@@ -55,13 +69,13 @@ class MainActivity : AppCompatActivity() {
             manager.enqueue(request)
         }
         saveButton.setOnClickListener{
-            saveValue(targetListApiEndpointInput.text.toString());
+            save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString());
         }
         authButton.setOnClickListener{
 
             val mScope = Scope("https://www.googleapis.com/auth/photoslibrary")
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestServerAuthCode(getString(R.string.gcp_client_id))
+                .requestServerAuthCode(gcpClientIdInput.text.toString())
                 .requestScopes(mScope)
                 .build()
             val mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -95,13 +109,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun saveValue(value: String): Boolean{
-        if (!isValidURL(value)){
+    private fun save(url: String,gcpClientId: String, gcpClientSecret: String): Boolean{
+        if (!isValidURL(url)){
             Toast.makeText(applicationContext, "正しくないURLです。", Toast.LENGTH_SHORT).show()
             return false
         }
         Toast.makeText(applicationContext, "保存しました", Toast.LENGTH_SHORT).show()
-        this.sharedPref.edit().putString("endpoint",value).apply()
+        this.sharedPref.edit().putString("endpoint",url).apply()
+        this.sharedPref.edit().putString("gcp_clientId",encrypt.encrypt(gcpClientId)).apply()
+        this.sharedPref.edit().putString("gcp_clientSecret",encrypt.encrypt(gcpClientSecret)).apply()
         return true
     }
 

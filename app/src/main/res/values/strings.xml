@@ -8,5 +8,4 @@
     <string name="gcp_options">GCP Options</string>
     <string name="target_api_options">Target API Options</string>
     <string name="gcp_auth">Auth</string>
-    <string name="gcp_client_id"></string>
 </resources>
