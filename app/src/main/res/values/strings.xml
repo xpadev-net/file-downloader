@@ -9,4 +9,5 @@
     <string name="target_api_options">Target API Options</string>
     <string name="gcp_auth">Auth</string>
     <string name="gcp_callback_url">GCP Callback Url</string>
+    <string name="grant_storage_permission">Grant Storage Permission</string>
 </resources>

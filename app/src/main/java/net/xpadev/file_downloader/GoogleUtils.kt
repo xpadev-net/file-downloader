@@ -10,8 +10,9 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import net.xpadev.file_downloader.structure.GoogleOauthResponse
-import net.xpadev.file_downloader.structure.GoogleTokenExchangeRequestBody
+import net.xpadev.file_downloader.structure.*
+import java.io.FileNotFoundException
+import java.io.IOException
 
 
 class GoogleUtils (private val applicationContext: Context) {
@@ -19,7 +20,7 @@ class GoogleUtils (private val applicationContext: Context) {
     private val pref = PrefUtils(applicationContext)
 
     fun getGoogleSignInOptions(clientId: String):GoogleSignInOptions {
-        val mScope = Scope("https://www.googleapis.com/auth/photoslibrary")
+        val mScope = Scope(Val.Google.scope)
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestServerAuthCode(clientId, true)
             .requestEmail()
@@ -51,11 +52,41 @@ class GoogleUtils (private val applicationContext: Context) {
             grantType = "authorization_code",
             redirectUri = gcpCallbackUrl,
         ))
-        val url = "https://oauth2.googleapis.com/token"
         Thread {
-            val json = network.postJson<GoogleOauthResponse>(url,body)
+            val json = network.postJson<GoogleOauthResponse>(Val.Google.tokenEndpoint,body)
             pref.save(Val.Pref.gcpAccessToken,json.accessToken)
             pref.save(Val.Pref.gcpRefreshToken,json.refreshToken)
         }.start()
+    }
+
+    private fun refreshToken() {
+        val gcpClientId = pref.get(Val.Pref.gcpClientId)
+        val gcpClientSecret = pref.get(Val.Pref.gcpClientSecret)
+        val gcpRefreshToken = pref.get(Val.Pref.gcpRefreshToken)
+        val body = Json.encodeToString(GoogleTokenRefreshRequestBody(
+            clientId = gcpClientId,
+            clientSecret = gcpClientSecret,
+            refreshToken = gcpRefreshToken,
+            grantType = "refresh_token"
+        ))
+        val json = network.postJson<GoogleTokenRefreshResponse>(Val.Google.tokenEndpoint,body)
+        pref.save(Val.Pref.gcpAccessToken,json.accessToken)
+    }
+
+    fun getPhotosList(): Array<GooglePhotosMediaItem>?{
+        val body = Json.encodeToString(GooglePhotosSearchRequestBody(
+            orderBy = "MediaMetadata.creation_time desc",
+            pageSize = 100,
+            pageToken = null,
+        ))
+        val json = try {
+            network.postJson<GooglePhotosSearchResponse>(Val.Google.photosSearchEndpoint,body,true)
+        }catch (_: FileNotFoundException){
+            refreshToken()
+            network.postJson<GooglePhotosSearchResponse>(Val.Google.photosSearchEndpoint,body,true)
+        }catch (_: IOException){
+            return null
+        }
+        return json.mediaItems
     }
 }

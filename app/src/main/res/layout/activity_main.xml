@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="50dp"
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
@@ -19,6 +20,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginVertical="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -39,10 +41,10 @@
                     android:id="@+id/gcp_client_id"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:autofillHints=""
                     android:ems="10"
                     android:hint="@string/gcp_client_id_text"
-                    android:inputType="text"
-                    android:autofillHints="" />
+                    android:inputType="text" />
             </LinearLayout>
 
             <LinearLayout
@@ -56,10 +58,10 @@
                     android:id="@+id/gcp_client_secret"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:autofillHints=""
                     android:ems="10"
                     android:hint="@string/gcp_client_secret"
-                    android:inputType="text"
-                    android:autofillHints="" />
+                    android:inputType="text" />
 
             </LinearLayout>
 
@@ -74,10 +76,10 @@
                     android:id="@+id/gcp_callback_url"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:autofillHints=""
                     android:ems="10"
                     android:hint="@string/gcp_callback_url"
-                    android:inputType="textUri"
-                    android:autofillHints="" />
+                    android:inputType="textUri" />
 
             </LinearLayout>
 
@@ -91,6 +93,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginVertical="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -102,26 +105,34 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/targetListApiEndpointInput"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/targetlistapi_endpoint"
                     android:inputType="textUri" />
 
-                <Button
-                    android:id="@+id/SaveButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/save"
-                    tools:ignore="NestedWeights" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/SaveButton"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/save"
+                tools:ignore="NestedWeights" />
+
         </LinearLayout>
+
+        <Button
+            android:id="@+id/StoragePermissionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="@string/grant_storage_permission" />
 
         <Button
             android:id="@+id/StartProcessButton"

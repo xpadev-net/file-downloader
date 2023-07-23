@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture
 
 class NetworkUtils (private val applicationContext: Context){
     val SafeJson = Json { ignoreUnknownKeys=true }
+    val pref = PrefUtils(applicationContext)
 
     inline fun <reified T> fetchJson(link: String):T{
         return parseJson<T>(fetchString(link))
@@ -37,7 +38,7 @@ class NetworkUtils (private val applicationContext: Context){
         }
     }
 
-    inline fun <reified T> postJson(link:String, body:String): T{
+    inline fun <reified T> postJson(link:String, body:String,auth:Boolean = false): T{
         val url = URL(link)
         val con = url.openConnection() as HttpURLConnection
         con.requestMethod = "POST"
@@ -45,6 +46,9 @@ class NetworkUtils (private val applicationContext: Context){
         con.setChunkedStreamingMode(0)
         con.setRequestProperty("Content-type", "application/json; charset=utf-8")
         con.setRequestProperty("Content-Length", body.length.toString())
+        if (auth){
+            con.setRequestProperty("Authorization","Bearer ${pref.get(Val.Pref.gcpAccessToken)}")
+        }
         con.useCaches = false
         val outputStream = con.outputStream
         outputStream.write(body.toByteArray())
@@ -70,7 +74,7 @@ class NetworkUtils (private val applicationContext: Context){
                 request.setTitle(fileName)
                 request.setDescription("Downloading")
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DCIM, "/Camera/${fileName}")
                 val downloadId = manager.enqueue(request)
 
                 val receiver = object : BroadcastReceiver() {

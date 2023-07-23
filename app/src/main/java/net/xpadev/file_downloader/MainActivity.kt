@@ -1,6 +1,7 @@
 package net.xpadev.file_downloader
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         val gcpClientIdInput = findViewById<EditText>(R.id.gcp_client_id)
         val gcpClientSecretInput = findViewById<EditText>(R.id.gcp_client_secret)
         val gcpCallbackUrlInput = findViewById<EditText>(R.id.gcp_callback_url)
+        val grantStoragePermissionButton = findViewById<Button>(R.id.StoragePermissionButton)
 
         targetListApiEndpointInput.setText(pref.get(Val.Pref.endpoint))
         gcpClientIdInput.setText(pref.get(Val.Pref.gcpClientId))
@@ -68,8 +70,10 @@ class MainActivity : AppCompatActivity() {
             val mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
             Log.i(javaClass.simpleName,"start activity")
             startForResult.launch(mGoogleSignInClient.signInIntent)
-
-
+        }
+        grantStoragePermissionButton.setOnClickListener{
+            val intent = Intent("android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION")
+            startActivity(intent)
         }
     }
     override fun onStart() {

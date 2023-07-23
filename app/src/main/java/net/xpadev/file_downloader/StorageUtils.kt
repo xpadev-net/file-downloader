@@ -2,13 +2,16 @@ package net.xpadev.file_downloader
 
 import android.app.usage.StorageStatsManager
 import android.content.Context
+import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import android.util.Log
+import java.io.File
 
 
 class StorageUtils (private val applicationContext: Context) {
-    private var _storageManager: StorageManager = applicationContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+    private val google = GoogleUtils(applicationContext)
+    private val _storageManager: StorageManager = applicationContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
     val GB = 1000L * 1000L * 1000L
     val GiB = 1024L * 1024L * 1024L
     val MB = 1000L * 1000L
@@ -35,6 +38,20 @@ class StorageUtils (private val applicationContext: Context) {
     }
 
     fun tryCleanup(){
+        val mediaList = google.getPhotosList() ?: return
+        val uploadedFileList = mutableListOf<String>();
+        mediaList.forEach {item ->
+            uploadedFileList.add(item.filename)
+        }
 
+        val files = File(Val.Storage.targetPath).listFiles() ?: return
+        for (i in files) {
+            if (i.name in uploadedFileList){
+                Log.i(javaClass.simpleName,"Uploaded: ${i.name}")
+                i.delete()
+            }else{
+                Log.i(javaClass.simpleName,"Uploading: ${i.name}")
+            }
+        }
     }
 }
