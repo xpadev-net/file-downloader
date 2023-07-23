@@ -11,7 +11,7 @@ class EncryptionUtils {
     private val IV_LENGTH = 16
     private val CIPHER_MODE = "AES/CBC/PKCS5Padding"
 
-    private val key = SecretKeySpec(",!9=uXJ^;i]8Hp,nB5xzT;t.c{QUt'<P".toByteArray(), "AES")
+    private val key = SecretKeySpec(Val.Encryption.key.toByteArray(), "AES")
     private val random = SecureRandom()
 
 
@@ -22,8 +22,6 @@ class EncryptionUtils {
         val ivSpec = IvParameterSpec(iv)
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec)
         val encrypted = cipher.doFinal(input.toByteArray())
-        Log.i("Encryption", cipher.iv.toString())
-        Log.i("Encryption", encrypted.toString())
 
         return Base64.getEncoder().encodeToString(cipher.iv + encrypted);
     }
@@ -38,8 +36,6 @@ class EncryptionUtils {
         val body = input.copyOfRange(IV_LENGTH,input.size)
         val cipher = Cipher.getInstance(CIPHER_MODE)
         cipher.init(Cipher.DECRYPT_MODE,key,ivSpec)
-        Log.i("Encryption", iv.toString())
-        Log.i("Encryption", body.toString())
         return String(cipher.doFinal(body))
     }
 
