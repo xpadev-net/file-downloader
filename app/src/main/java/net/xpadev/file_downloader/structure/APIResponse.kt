@@ -11,6 +11,6 @@ data class TargetListResponse(
 @Serializable
 data class Item(
     val link: String,
-    val id: Int,
-    val fileSize: Int,
+    val id: Long,
+    val fileSize: Long,
 )
