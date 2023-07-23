@@ -73,7 +73,7 @@ class NetworkUtils (private val applicationContext: Context){
                 val request = DownloadManager.Request(Uri.parse(link))
                 request.setTitle(fileName)
                 request.setDescription("Downloading")
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DCIM, "/Camera/${fileName}")
                 val downloadId = manager.enqueue(request)
 

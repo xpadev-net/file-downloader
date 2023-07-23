@@ -37,6 +37,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
                 setForeground(createForegroundInfo("downloading... (page:${manifestCount},pos: ${pos}/${res.data.size})"))
                 val result = this.network.download(item.link)
                 if (result.isFailure){
+                    setForeground(createForegroundInfo("failed to download (page:${manifestCount},pos: ${pos}/${res.data.size})"))
                     continue;
                 }
                 this.network.fetchString("${res.markAsComplete}?id=${item.id}")
