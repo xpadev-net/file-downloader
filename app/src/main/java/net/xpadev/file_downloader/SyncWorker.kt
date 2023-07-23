@@ -61,7 +61,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
             .setOngoing(true)
             .build()
 
-        return ForegroundInfo(notificationId++, notification)
+        return ForegroundInfo(notificationId, notification)
     }
 
 
