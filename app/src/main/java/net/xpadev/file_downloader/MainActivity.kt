@@ -20,21 +20,12 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private val manager = WorkManager.getInstance()
-    private val google = GoogleUtils(applicationContext)
-    private val pref = PrefUtils(applicationContext)
-    override fun onStart() {
-        super.onStart()
-
-        val account = GoogleSignIn.getLastSignedInAccount(this)
-        if(account != null) {
-            Log.i("Main",account.account.toString())
-            Log.i("Main",account.id.toString())
-            Log.i("Main",account.idToken.toString())
-            Log.i("Main",account.serverAuthCode.toString())
-        }
-    }
+    private lateinit var google: GoogleUtils
+    private lateinit var pref: PrefUtils
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        google = GoogleUtils(applicationContext)
+        pref = PrefUtils(applicationContext)
         setContentView(R.layout.activity_main)
         val startProcessButton = findViewById<Button>(R.id.StartProcessButton)
         val saveButton = findViewById<Button>(R.id.SaveButton)
@@ -78,6 +69,16 @@ class MainActivity : AppCompatActivity() {
             startForResult.launch(mGoogleSignInClient.signInIntent)
 
 
+        }
+    }
+    override fun onStart() {
+        super.onStart()
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        if(account != null) {
+            Log.i("Main",account.account.toString())
+            Log.i("Main",account.id.toString())
+            Log.i("Main",account.idToken.toString())
+            Log.i("Main",account.serverAuthCode.toString())
         }
     }
 

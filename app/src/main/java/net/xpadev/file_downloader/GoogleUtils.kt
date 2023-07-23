@@ -8,7 +8,6 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
-import net.xpadev.file_downloader.structure.GoogleOauthResponse
 
 class GoogleUtils (private val applicationContext: Context) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);

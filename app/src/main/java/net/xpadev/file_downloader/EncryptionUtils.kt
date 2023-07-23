@@ -1,6 +1,7 @@
 package net.xpadev.file_downloader
 
 import android.util.Log
+import java.lang.Exception
 import java.security.SecureRandom
 import java.util.Base64
 import javax.crypto.Cipher
@@ -30,13 +31,17 @@ class EncryptionUtils {
         if (rawInput==null||rawInput == ""){
             return ""
         }
-        val input = Base64.getDecoder().decode(rawInput)
-        val iv =input.copyOfRange(0,IV_LENGTH)
-        val ivSpec = IvParameterSpec(iv)
-        val body = input.copyOfRange(IV_LENGTH,input.size)
-        val cipher = Cipher.getInstance(CIPHER_MODE)
-        cipher.init(Cipher.DECRYPT_MODE,key,ivSpec)
-        return String(cipher.doFinal(body))
+        return try {
+            val input = Base64.getDecoder().decode(rawInput)
+            val iv =input.copyOfRange(0,IV_LENGTH)
+            val ivSpec = IvParameterSpec(iv)
+            val body = input.copyOfRange(IV_LENGTH,input.size)
+            val cipher = Cipher.getInstance(CIPHER_MODE)
+            cipher.init(Cipher.DECRYPT_MODE,key,ivSpec)
+            String(cipher.doFinal(body))
+        }catch (_:Exception){
+            ""
+        }
     }
 
 }
