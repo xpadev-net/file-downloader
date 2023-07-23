@@ -129,15 +129,17 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/StoragePermissionButton"
+            android:id="@+id/storagePermissionButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
             tools:text="@string/grant_storage_permission" />
 
         <Button
             android:id="@+id/StartProcessButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
             android:text="@string/startprocess" />
     </LinearLayout>
 
