@@ -69,7 +69,8 @@ class MainActivity : AppCompatActivity() {
                 }.build()
                 setInputData(data)
             }.build()
-            manager.enqueueUniquePeriodicWork(Val.Worker.workName,ExistingPeriodicWorkPolicy.KEEP,request)
+            manager.enqueueUniquePeriodicWork(Val.Worker.workName,
+                ExistingPeriodicWorkPolicy.UPDATE,request)
         }
         saveButton.setOnClickListener{
             save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString(), gcpCallbackUrlInput.text.toString());

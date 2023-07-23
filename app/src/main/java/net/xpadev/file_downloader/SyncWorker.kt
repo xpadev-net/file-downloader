@@ -25,6 +25,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
         while (res.data.isNotEmpty()){
             var pos = 0
             for (item in res.data){
+                setForeground(createForegroundInfo("cleaning... (page:${manifestCount},pos: ${pos}/${res.data.size})"))
                 storage.tryCleanup()
                 var spaceLeft = storage.getFreeBytes();
                 var tryCount = 0;
