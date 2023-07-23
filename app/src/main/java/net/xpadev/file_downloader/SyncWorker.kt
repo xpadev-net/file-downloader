@@ -20,21 +20,31 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
         Log.i(javaClass.simpleName, "init")
         storage.tryCleanup()
         val endpoint = inputData.getString("endpoint") ?: return Result.failure();
-        setForeground(createForegroundInfo("loading metadata"))
-        val res = this.network.fetchJson<TargetListResponse>(endpoint)
-        for (item in res.data){
-            var spaceLeft = storage.getFreeBytes();
-            while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
-                setForeground(createForegroundInfo("waiting for upload..."))
-                spaceLeft = storage.getFreeBytes();
-                Thread.sleep(10000L)
+        var manifestCount = 0;
+        setForeground(createForegroundInfo("loading metadata (page:${manifestCount})"))
+        var res = this.network.fetchJson<TargetListResponse>(endpoint)
+        while (res.data.isNotEmpty()){
+            var pos = 0
+            for (item in res.data){
+                var spaceLeft = storage.getFreeBytes();
+                var tryCount = 0;
+                while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
+                    setForeground(createForegroundInfo("waiting for upload... (page:${manifestCount},pos: ${pos}/${res.data.size},retry: ${tryCount})"))
+                    spaceLeft = storage.getFreeBytes();
+                    Thread.sleep(10000L)
+                    tryCount++
+                }
+                setForeground(createForegroundInfo("downloading... (page:${manifestCount},pos: ${pos}/${res.data.size})"))
+                val result = this.network.download(item.link)
+                if (result.isFailure){
+                    continue;
+                }
+                this.network.fetchString("${res.markAsComplete}?id=${item.id}")
+                pos++
             }
-            setForeground(createForegroundInfo("downloading..."))
-            val result = this.network.download(item.link)
-            if (result.isFailure){
-                continue;
-            }
-            this.network.fetchString("${res.markAsComplete}?id=${item.id}")
+            manifestCount++
+            setForeground(createForegroundInfo("loading metadata (page:${manifestCount})"))
+            res = this.network.fetchJson<TargetListResponse>(endpoint)
         }
         setForeground(createForegroundInfo("success"))
         return Result.success()
