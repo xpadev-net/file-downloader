@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import net.xpadev.file_downloader.structure.TargetListResponse
+import java.lang.Exception
 
 class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);
@@ -36,12 +37,17 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
                     tryCount++
                 }
                 setForeground(createForegroundInfo("downloading... (page:${manifestCount},pos: ${pos}/${res.data.size})"))
-                val result = this.network.download(item.link)
-                if (result.isFailure){
-                    setForeground(createForegroundInfo("failed to download (page:${manifestCount},pos: ${pos}/${res.data.size})"))
-                    continue;
+                try {
+                    val result = this.network.download(item.link)
+                    if (result.isFailure){
+                        setForeground(createForegroundInfo("failed to download (page:${manifestCount},pos: ${pos}/${res.data.size})"))
+                        continue;
+                    }
+                    this.network.fetchString("${res.markAsComplete}?id=${item.id}")
+                }catch (e: Exception){
+                    e.printStackTrace()
+                    Log.e(javaClass.simpleName,e.toString())
                 }
-                this.network.fetchString("${res.markAsComplete}?id=${item.id}")
                 pos++
             }
             manifestCount++
@@ -53,6 +59,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
     }
 
     private fun createForegroundInfo(progress: String): ForegroundInfo {
+        Log.i(javaClass.simpleName,progress)
         val title = "downloading"
 
         val notification = NotificationCompat.Builder(applicationContext, Val.Notification.channelId)

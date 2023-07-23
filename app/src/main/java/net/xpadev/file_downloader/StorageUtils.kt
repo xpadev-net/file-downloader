@@ -49,8 +49,6 @@ class StorageUtils (private val applicationContext: Context) {
             if (i.name in uploadedFileList){
                 Log.i(javaClass.simpleName,"Uploaded: ${i.name}")
                 i.delete()
-            }else{
-                Log.i(javaClass.simpleName,"Uploading: ${i.name}")
             }
         }
     }
