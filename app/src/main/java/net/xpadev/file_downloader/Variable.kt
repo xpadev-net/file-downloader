@@ -1,7 +1,5 @@
 package net.xpadev.file_downloader
 
-import android.os.Environment
-
 object Val {
     object Pref{
         const val endpoint = "endpoint"
@@ -22,5 +20,8 @@ object Val {
     }
     object Storage{
         const val targetPath = "/storage/emulated/0/DCIM/Camera"
+    }
+    object Notification{
+        const val channelId = "net.xpadev.file_downloader.SyncWorker"
     }
 }

@@ -1,5 +1,7 @@
 package net.xpadev.file_downloader
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -44,6 +46,15 @@ class MainActivity : AppCompatActivity() {
         gcpClientSecretInput.setText(pref.get(Val.Pref.gcpClientSecret))
         gcpCallbackUrlInput.setText(pref.get(Val.Pref.gcpCallbackUrl))
         Log.i(javaClass.simpleName, "init")
+
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        val channel = NotificationChannel(
+            Val.Notification.channelId,
+            "SyncWorker",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
 
         startProcessButton.setOnClickListener {
             Log.i(javaClass.simpleName, "pressed")

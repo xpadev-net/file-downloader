@@ -41,22 +41,14 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
     }
 
     private fun createForegroundInfo(progress: String): ForegroundInfo {
-        val id = "net.xpadev.file_downloader.SyncWorker"
         val title = "downloading"
-        val cancel = "cancel"
-        // This PendingIntent can be used to cancel the worker
-        val intent = WorkManager.getInstance(applicationContext)
-            .createCancelPendingIntent(getId())
 
-        val notification = NotificationCompat.Builder(applicationContext, id)
+        val notification = NotificationCompat.Builder(applicationContext, Val.Notification.channelId)
             .setContentTitle(title)
             .setTicker(title)
             .setContentText(progress)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
-            // Add the cancel action to the notification which can
-            // be used to cancel the worker
-            .addAction(android.R.drawable.ic_delete, cancel, intent)
             .build()
 
         return ForegroundInfo(notificationId++, notification)
