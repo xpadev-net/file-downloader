@@ -73,11 +73,22 @@ class GoogleUtils (private val applicationContext: Context) {
         pref.save(Val.Pref.gcpAccessToken,json.accessToken)
     }
 
-    fun getPhotosList(): Array<GooglePhotosMediaItem>?{
+    fun getPhotosList(): Array<GooglePhotosMediaItem>{
+        var pageToken: String? = null
+        var result = emptyArray<GooglePhotosMediaItem>();
+        for (i in 1..3){
+            val response = fetchPhotosList(pageToken) ?: return result
+            pageToken = response.nextPageToken
+            result = merge(result, response.mediaItems)
+        }
+        return result
+    }
+
+    private fun fetchPhotosList(pageToken: String? = null): GooglePhotosSearchResponse?{
         val body = Json.encodeToString(GooglePhotosSearchRequestBody(
             orderBy = "MediaMetadata.creation_time desc",
             pageSize = 100,
-            pageToken = null,
+            pageToken = pageToken,
         ))
         val json = try {
             network.postJson<GooglePhotosSearchResponse>(Val.Google.photosSearchEndpoint,body,true)
@@ -87,6 +98,14 @@ class GoogleUtils (private val applicationContext: Context) {
         }catch (_: IOException){
             return null
         }
-        return json.mediaItems
+        return json
+    }
+
+    private inline fun<reified T> merge(vararg arrays: Array<T>): Array<T> {
+        val list: MutableList<T> = ArrayList()
+        for (array in arrays) {
+            list.addAll(array.map { i -> i })
+        }
+        return list.toTypedArray()
     }
 }

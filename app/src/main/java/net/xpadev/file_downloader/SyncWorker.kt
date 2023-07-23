@@ -18,7 +18,6 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
 
     override suspend fun doWork(): Result {
         Log.i(javaClass.simpleName, "init")
-        storage.tryCleanup()
         val endpoint = inputData.getString("endpoint") ?: return Result.failure();
         var manifestCount = 0;
         setForeground(createForegroundInfo("loading metadata (page:${manifestCount})"))
@@ -26,6 +25,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
         while (res.data.isNotEmpty()){
             var pos = 0
             for (item in res.data){
+                storage.tryCleanup()
                 var spaceLeft = storage.getFreeBytes();
                 var tryCount = 0;
                 while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
