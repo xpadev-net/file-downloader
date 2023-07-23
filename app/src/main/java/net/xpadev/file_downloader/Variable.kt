@@ -24,4 +24,7 @@ object Val {
     object Notification{
         const val channelId = "net.xpadev.file_downloader.SyncWorker"
     }
+    object Worker{
+        const val workName = "net.xpadev.file_downloader.SyncWorker"
+    }
 }

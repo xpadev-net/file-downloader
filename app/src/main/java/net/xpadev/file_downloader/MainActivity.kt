@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.Data
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                 }.build()
                 setInputData(data)
             }.build()
-            manager.enqueue(request)
+            manager.enqueueUniquePeriodicWork(Val.Worker.workName,ExistingPeriodicWorkPolicy.KEEP,request)
         }
         saveButton.setOnClickListener{
             save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString(), gcpCallbackUrlInput.text.toString());
