@@ -8,6 +8,11 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import net.xpadev.file_downloader.structure.GoogleOauthResponse
+import net.xpadev.file_downloader.structure.GoogleTokenExchangeRequestBody
+
 
 class GoogleUtils (private val applicationContext: Context) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);
@@ -16,7 +21,7 @@ class GoogleUtils (private val applicationContext: Context) {
     fun getGoogleSignInOptions(clientId: String):GoogleSignInOptions {
         val mScope = Scope("https://www.googleapis.com/auth/photoslibrary")
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestServerAuthCode(clientId)
+            .requestServerAuthCode(clientId, true)
             .requestEmail()
             .requestScopes(mScope)
             .build()
@@ -29,19 +34,28 @@ class GoogleUtils (private val applicationContext: Context) {
         if (account != null) {
             Toast.makeText(applicationContext, "${account.email}でログインしました", Toast.LENGTH_SHORT).show()
             try {
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.id.toString())
-                Log.i("Main",account.idToken.toString())
-                Log.i("Main",account.serverAuthCode.toString())
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.account.toString())
-                Log.i("Main",account.account.toString())
+                exchangeCodeToToken(account.serverAuthCode.toString())
             } catch (e: ApiException) {
-                Log.e("Main",e.toString())
+                Log.e(javaClass.simpleName,e.toString())
             }
         }
+    }
+    private fun exchangeCodeToToken(code:String){
+        val gcpClientId = pref.get(Val.Pref.gcpClientId)
+        val gcpClientSecret = pref.get(Val.Pref.gcpClientSecret)
+        val gcpCallbackUrl = pref.get(Val.Pref.gcpCallbackUrl)
+        val body = Json.encodeToString(GoogleTokenExchangeRequestBody(
+            clientId = gcpClientId,
+            clientSecret = gcpClientSecret,
+            code= code,
+            grantType = "authorization_code",
+            redirectUri = gcpCallbackUrl,
+        ))
+        val url = "https://oauth2.googleapis.com/token"
+        Thread {
+            val json = network.postJson<GoogleOauthResponse>(url,body)
+            pref.save(Val.Pref.gcpAccessToken,json.accessToken)
+            pref.save(Val.Pref.gcpRefreshToken,json.refreshToken)
+        }.start()
     }
 }

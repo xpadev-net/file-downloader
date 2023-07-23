@@ -5,6 +5,9 @@ object Val {
         const val endpoint = "endpoint"
         const val gcpClientId = "gcp_clientId"
         const val gcpClientSecret = "gcp_clientSecret"
+        const val gcpCallbackUrl = "gcp_callbackUrl"
+        const val gcpAccessToken = "gcp_accessToken"
+        const val gcpRefreshToken = "gcp_refreshToken"
         const val prefId = "net.xpadev.file_downloader"
     }
     object Encryption {

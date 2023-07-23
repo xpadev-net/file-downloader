@@ -17,7 +17,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
     private var notificationId: Int = 0;
 
     override suspend fun doWork(): Result {
-        Log.i("SyncWorker", "init")
+        Log.i(javaClass.simpleName, "init")
         storage.tryCleanup()
         val endpoint = inputData.getString("endpoint") ?: return Result.failure();
         setForeground(createForegroundInfo("loading metadata"))

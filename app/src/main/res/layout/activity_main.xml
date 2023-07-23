@@ -32,7 +32,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:ignore="NestedWeights">
 
                 <EditText
                     android:id="@+id/gcp_client_id"
@@ -40,14 +41,16 @@
                     android:layout_height="match_parent"
                     android:ems="10"
                     android:hint="@string/gcp_client_id_text"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:autofillHints="" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:ignore="NestedWeights">
 
                 <EditText
                     android:id="@+id/gcp_client_secret"
@@ -55,7 +58,26 @@
                     android:layout_height="match_parent"
                     android:ems="10"
                     android:hint="@string/gcp_client_secret"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:autofillHints="" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                tools:ignore="NestedWeights">
+
+                <EditText
+                    android:id="@+id/gcp_callback_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:hint="@string/gcp_callback_url"
+                    android:inputType="textUri"
+                    android:autofillHints="" />
 
             </LinearLayout>
 
@@ -81,7 +103,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:orientation="horizontal">
 
                 <EditText
@@ -90,11 +111,11 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/targetlistapi_endpoint"
-                    android:inputType="text" />
+                    android:inputType="textUri" />
 
                 <Button
                     android:id="@+id/SaveButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/save"

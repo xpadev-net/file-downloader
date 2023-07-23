@@ -8,7 +8,7 @@ class CallbackActivity : AppCompatActivity()  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_callback)
-        Log.i("Callback",intent?.action.toString())
-        Log.i("Callback",intent?.data.toString())
+        Log.i(javaClass.simpleName,intent?.action.toString())
+        Log.i(javaClass.simpleName,intent?.data.toString())
     }
 }

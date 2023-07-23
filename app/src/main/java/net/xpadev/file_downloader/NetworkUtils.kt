@@ -10,15 +10,20 @@ import android.os.Environment
 import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
+import java.io.DataOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.CompletableFuture
 
 class NetworkUtils (private val applicationContext: Context){
+    val SafeJson = Json { ignoreUnknownKeys=true }
 
     inline fun <reified T> fetchJson(link: String):T{
-        val json = fetchString(link).trimIndent();
-        return Json.decodeFromString<T>(json)
+        return parseJson<T>(fetchString(link))
+    }
+
+    inline fun <reified T> parseJson(input: String): T{
+        return SafeJson.decodeFromString<T>(input.trimIndent())
     }
 
     fun fetchString(link: String): String {
@@ -30,6 +35,25 @@ class NetworkUtils (private val applicationContext: Context){
         return con.inputStream.bufferedReader(Charsets.UTF_8).use { br ->
             br.readLines().joinToString("")
         }
+    }
+
+    inline fun <reified T> postJson(link:String, body:String): T{
+        val url = URL(link)
+        val con = url.openConnection() as HttpURLConnection
+        con.requestMethod = "POST"
+        con.doOutput = true
+        con.setChunkedStreamingMode(0)
+        con.setRequestProperty("Content-type", "application/json; charset=utf-8")
+        con.setRequestProperty("Content-Length", body.length.toString())
+        con.useCaches = false
+        val outputStream = con.outputStream
+        outputStream.write(body.toByteArray())
+        outputStream.flush()
+        outputStream.close()
+        val json = con.inputStream.bufferedReader(Charsets.UTF_8).use { br ->
+            br.readLines().joinToString("")
+        }
+        return parseJson<T>(json)
     }
 
     fun download(link: String, _fileName: String=""): Result<String> {
@@ -53,7 +77,7 @@ class NetworkUtils (private val applicationContext: Context){
                     override fun onReceive(context: Context, intent: Intent) {
                         val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                         if (id == downloadId) {
-                            Log.i("SyncService", "Download successful")
+                            Log.i(javaClass.simpleName, "Download successful")
                             completableFuture.complete(Result.success("success"))
                         }
                     }

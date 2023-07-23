@@ -22,6 +22,10 @@ class MainActivity : AppCompatActivity() {
     private val manager = WorkManager.getInstance()
     private lateinit var google: GoogleUtils
     private lateinit var pref: PrefUtils
+    private val startForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+            google.processLogin(result)
+        }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         google = GoogleUtils(applicationContext)
@@ -33,16 +37,18 @@ class MainActivity : AppCompatActivity() {
         val targetListApiEndpointInput = findViewById<EditText>(R.id.targetListApiEndpointInput)
         val gcpClientIdInput = findViewById<EditText>(R.id.gcp_client_id)
         val gcpClientSecretInput = findViewById<EditText>(R.id.gcp_client_secret)
+        val gcpCallbackUrlInput = findViewById<EditText>(R.id.gcp_callback_url)
 
         targetListApiEndpointInput.setText(pref.get(Val.Pref.endpoint))
         gcpClientIdInput.setText(pref.get(Val.Pref.gcpClientId))
         gcpClientSecretInput.setText(pref.get(Val.Pref.gcpClientSecret))
-        Log.i("Main", "init")
+        gcpCallbackUrlInput.setText(pref.get(Val.Pref.gcpCallbackUrl))
+        Log.i(javaClass.simpleName, "init")
 
         startProcessButton.setOnClickListener {
-            Log.i("Main", "pressed")
+            Log.i(javaClass.simpleName, "pressed")
             val value = targetListApiEndpointInput.text.toString()
-            if (!save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString())){
+            if (!save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString(), gcpCallbackUrlInput.text.toString())){
                 return@setOnClickListener;
             }
             val request = PeriodicWorkRequestBuilder<SyncWorker>(15,TimeUnit.MINUTES).apply {
@@ -54,18 +60,13 @@ class MainActivity : AppCompatActivity() {
             manager.enqueue(request)
         }
         saveButton.setOnClickListener{
-            save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString());
+            save(targetListApiEndpointInput.text.toString(),gcpClientIdInput.text.toString(),gcpClientSecretInput.text.toString(), gcpCallbackUrlInput.text.toString());
         }
         authButton.setOnClickListener{
             val clientId = gcpClientIdInput.text.toString();
             val gso = google.getGoogleSignInOptions(clientId)
             val mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-            Log.i("Main","start activity")
-
-            val startForResult =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
-                    google.processLogin(result)
-                }
+            Log.i(javaClass.simpleName,"start activity")
             startForResult.launch(mGoogleSignInClient.signInIntent)
 
 
@@ -75,15 +76,15 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         val account = GoogleSignIn.getLastSignedInAccount(this)
         if(account != null) {
-            Log.i("Main",account.account.toString())
-            Log.i("Main",account.id.toString())
-            Log.i("Main",account.idToken.toString())
-            Log.i("Main",account.serverAuthCode.toString())
+            Log.i(javaClass.simpleName,account.account.toString())
+            Log.i(javaClass.simpleName,account.id.toString())
+            Log.i(javaClass.simpleName,account.idToken.toString())
+            Log.i(javaClass.simpleName,account.serverAuthCode.toString())
         }
     }
 
-    private fun save(url: String,gcpClientId: String, gcpClientSecret: String): Boolean{
-        if (!isValidURL(url)){
+    private fun save(url: String,gcpClientId: String, gcpClientSecret: String,gcpCallbackUrl: String): Boolean{
+        if (!isValidURL(url) || !isValidURL(gcpCallbackUrl)){
             Toast.makeText(applicationContext, "正しくないURLです。", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -91,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         pref.save(Val.Pref.endpoint,url)
         pref.save(Val.Pref.gcpClientId, gcpClientId)
         pref.save(Val.Pref.gcpClientSecret, gcpClientSecret)
+        pref.save(Val.Pref.gcpCallbackUrl, gcpCallbackUrl)
         return true
     }
 

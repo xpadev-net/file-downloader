@@ -11,3 +11,12 @@ data class GoogleOauthResponse(
     val scope: String,
     @SerialName("refresh_token") val refreshToken: String,
 )
+
+@Serializable
+data class GoogleTokenExchangeRequestBody(
+    @SerialName("client_id") val clientId: String,
+    @SerialName("client_secret") val clientSecret: String,
+    @SerialName("code") val code: String,
+    @SerialName("grant_type") val grantType: String,
+    @SerialName("redirect_uri") val redirectUri: String,
+)

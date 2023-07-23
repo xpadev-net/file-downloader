@@ -21,7 +21,7 @@ class StorageUtils (private val applicationContext: Context) {
         for (file in extDirs){
             val storageVolume: StorageVolume? = _storageManager.getStorageVolume(file)
             if (storageVolume == null) {
-                Log.d("StorageUtils", "Could not determinate StorageVolume for ${file.path}")
+                Log.d(javaClass.simpleName, "Could not determinate StorageVolume for ${file.path}")
             } else {
                 if (storageVolume.isPrimary) {
                     val uuid = StorageManager.UUID_DEFAULT
