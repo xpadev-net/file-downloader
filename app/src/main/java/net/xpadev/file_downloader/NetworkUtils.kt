@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 class NetworkUtils (private val applicationContext: Context){
     val SafeJson = Json { ignoreUnknownKeys=true }
     val pref = PrefUtils(applicationContext)
-    private val notificationId: Int = 0;
+    private val notificationId: Int = 1;
     private val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     inline fun <reified T> fetchJson(link: String):T{

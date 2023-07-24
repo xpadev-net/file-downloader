@@ -77,6 +77,7 @@ class GoogleUtils (private val applicationContext: Context) {
         var pageToken: String? = null
         var result = emptyArray<GooglePhotosMediaItem>();
         for (i in 1..3){
+            Log.i(javaClass.simpleName,"loading photo list (page: ${i})")
             val response = fetchPhotosList(pageToken) ?: return result
             pageToken = response.nextPageToken
             result = merge(result, response.mediaItems)
@@ -93,6 +94,7 @@ class GoogleUtils (private val applicationContext: Context) {
         val json = try {
             network.postJson<GooglePhotosSearchResponse>(Val.Google.photosSearchEndpoint,body,true)
         }catch (_: FileNotFoundException){
+            Log.i(javaClass.simpleName,"refreshing token...")
             refreshToken()
             network.postJson<GooglePhotosSearchResponse>(Val.Google.photosSearchEndpoint,body,true)
         }catch (_: IOException){

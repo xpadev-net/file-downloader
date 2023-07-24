@@ -1,5 +1,6 @@
 package net.xpadev.file_downloader
 
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -15,35 +16,38 @@ import java.lang.Exception
 class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);
     private var storage: StorageUtils = StorageUtils(applicationContext);
+    private val notify = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationId: Int = 0;
 
     override suspend fun doWork(): Result {
         Log.i(javaClass.simpleName, "init")
         val endpoint = inputData.getString("endpoint") ?: return Result.failure();
         var manifestCount = 0;
-        setForeground(createForegroundInfo("loading metadata","page: 0"))
+        setForeground(createForegroundInfo())
+        updateNotify("loading metadata","page: 0")
         var res = this.network.fetchJson<TargetListResponse>(endpoint)
         while (res.data.isNotEmpty()){
             var pos = 0
             for (item in res.data){
-                setForeground(createForegroundInfo("cleaning...","page: ${manifestCount}, pos: ${pos}/${res.data.size}"))
-                storage.tryCleanup()
-                var spaceLeft = storage.getFreeBytes();
-                var tryCount = 0;
-                while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
-                    setForeground(createForegroundInfo("waiting for upload...","page: ${manifestCount}, pos: ${pos}/${res.data.size}, retry: $tryCount"))
-                    spaceLeft = storage.getFreeBytes();
-                    Thread.sleep(10000L)
-                    tryCount++
-                }
-                setForeground(createForegroundInfo("downloading...","page: ${manifestCount}, pos: ${pos}/${res.data.size}"))
                 try {
+                    updateNotify("cleaning...","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
+                    storage.tryCleanup()
+                    var spaceLeft = storage.getFreeBytes();
+                    var tryCount = 0;
+                    while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
+                        updateNotify("waiting for upload...","page: ${manifestCount}, pos: ${pos}/${res.data.size}, retry: $tryCount")
+                        storage.tryCleanup()
+                        spaceLeft = storage.getFreeBytes();
+                        Thread.sleep(10000L)
+                        tryCount++
+                    }
+                    updateNotify("downloading...","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
                     val result = this.network.download(item.link)
                     if (result.isFailure){
-                        setForeground(createForegroundInfo("download failed","page: ${manifestCount}, pos: ${pos}/${res.data.size}"))
+                        updateNotify("download failed","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
                         continue;
                     }
-                    setForeground(createForegroundInfo("successfully downloaded","page: ${manifestCount}, pos: ${pos}/${res.data.size}"))
+                    updateNotify("successfully downloaded","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
                     this.network.fetchString("${res.markAsComplete}?id=${item.id}")
                 }catch (e: Exception){
                     e.printStackTrace()
@@ -52,14 +56,28 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
                 pos++
             }
             manifestCount++
-            setForeground(createForegroundInfo("loading metadata","page: $manifestCount"))
+            updateNotify("loading metadata","page: $manifestCount")
             res = this.network.fetchJson<TargetListResponse>(endpoint)
         }
-        setForeground(createForegroundInfo("download completed","success"))
+        updateNotify("download completed","success")
         return Result.success()
     }
 
-    private fun createForegroundInfo(title:String,progress: String): ForegroundInfo {
+    private fun createForegroundInfo(): ForegroundInfo {
+        Log.i(javaClass.simpleName,"init")
+
+        val notification = NotificationCompat.Builder(applicationContext, Val.Notification.channelId)
+            .setContentTitle("init")
+            .setTicker("init")
+            .setContentText("init")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+            .build()
+
+        return ForegroundInfo(notificationId, notification)
+    }
+
+    private fun updateNotify(title:String,progress: String){
         Log.i(javaClass.simpleName,"${title}: $progress")
 
         val notification = NotificationCompat.Builder(applicationContext, Val.Notification.channelId)
@@ -69,9 +87,7 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .build()
-
-        return ForegroundInfo(notificationId, notification)
+        notify.notify(notificationId,notification)
     }
-
 
 }
