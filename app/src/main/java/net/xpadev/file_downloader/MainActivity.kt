@@ -48,14 +48,7 @@ class MainActivity : AppCompatActivity() {
         gcpCallbackUrlInput.setText(pref.get(Val.Pref.gcpCallbackUrl))
         Log.i(javaClass.simpleName, "init")
 
-
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        val channel = NotificationChannel(
-            Val.Notification.channelId,
-            "SyncWorker",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
+        createNotificationChannel()
 
         startProcessButton.setOnClickListener {
             Log.i(javaClass.simpleName, "pressed")
@@ -119,6 +112,16 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             false
         }
+    }
+
+    private fun createNotificationChannel(){
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        val channel = NotificationChannel(
+            Val.Notification.channelId,
+            "SyncWorker",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
     }
 
 }
