@@ -38,11 +38,7 @@ class StorageUtils (private val applicationContext: Context) {
     }
 
     fun tryCleanup(){
-        val mediaList = google.getPhotosList() ?: return
-        val uploadedFileList = mutableListOf<String>();
-        mediaList.forEach {item ->
-            uploadedFileList.add(item.filename)
-        }
+        val uploadedFileList = google.getPhotosList()
 
         val files = File(Val.Storage.targetPath).listFiles() ?: return
         for (i in files) {

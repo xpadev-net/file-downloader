@@ -30,19 +30,18 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
             var pos = 0
             for (item in res.data){
                 try {
-                    updateNotify("cleaning...","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
-                    storage.tryCleanup()
                     var spaceLeft = storage.getFreeBytes();
                     var tryCount = 0;
                     while (spaceLeft.isFailure || item.fileSize+storage.GB*5 > spaceLeft.getOrDefault(0)){
                         updateNotify("waiting for upload...","page: ${manifestCount}, pos: ${pos}/${res.data.size}, retry: $tryCount")
+                        Thread.sleep(60_000L)
+                        updateNotify("cleaning...","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
                         storage.tryCleanup()
                         spaceLeft = storage.getFreeBytes();
-                        Thread.sleep(10000L)
                         tryCount++
                     }
                     updateNotify("downloading...","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
-                    val result = this.network.download(item.link)
+                    val result = this.network.download(item.link,item.fileSize)
                     if (result.isFailure){
                         updateNotify("download failed","page: ${manifestCount}, pos: ${pos}/${res.data.size}")
                         continue;

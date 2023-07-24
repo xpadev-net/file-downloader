@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.serialization.json.Json
@@ -63,11 +64,9 @@ class NetworkUtils (private val applicationContext: Context){
         return parseJson<T>(json)
     }
 
-    fun download(link: String, _fileName: String=""): Result<String> {
+    fun download(link: String, fileSize: Long): Result<String> {
         val completableFuture = CompletableFuture<Result<String>>()
-        val fileName = _fileName.ifBlank {
-            link.substring(link.lastIndexOf("/") + 1)
-        }
+        val fileName = link.substring(link.lastIndexOf("/") + 1)
 
         val url = URL(link)
         showProgress(fileName,0)
@@ -76,11 +75,11 @@ class NetworkUtils (private val applicationContext: Context){
             try {
                 val connection = url.openConnection()
 
-                val totalBytes = connection.contentLength.toLong()
+                Log.i(javaClass.simpleName,"connected")
+                val totalBytes = fileSize.toLong()
                 val inputStream = BufferedInputStream(connection.getInputStream())
 
                 var downloadedBytes: Long = 0
-
                 val contentValues = ContentValues().apply {
                     put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Video.Media.MIME_TYPE, "video/*")
@@ -97,11 +96,13 @@ class NetworkUtils (private val applicationContext: Context){
                         val buffer = ByteArray(1024)
                         var bytesRead: Int
                         var lastProgress = 0
+                        Log.i(javaClass.simpleName,"download start")
                         while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                             output.write(buffer, 0, bytesRead)
                             downloadedBytes += bytesRead
                             val progress = (downloadedBytes.toDouble() / totalBytes.toDouble() * 100).roundToInt()
                             if (lastProgress < progress){
+                                Log.i(javaClass.simpleName,"downloading... ${downloadedBytes}/${totalBytes}")
                                 lastProgress = progress
                                 showProgress(fileName, progress)
                             }

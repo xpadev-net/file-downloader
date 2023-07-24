@@ -18,6 +18,7 @@ import java.io.IOException
 class GoogleUtils (private val applicationContext: Context) {
     private var network: NetworkUtils = NetworkUtils(applicationContext);
     private val pref = PrefUtils(applicationContext)
+    private var archivedArray = emptyArray<String>()
 
     fun getGoogleSignInOptions(clientId: String):GoogleSignInOptions {
         val mScope = Scope(Val.Google.scope)
@@ -73,16 +74,25 @@ class GoogleUtils (private val applicationContext: Context) {
         pref.save(Val.Pref.gcpAccessToken,json.accessToken)
     }
 
-    fun getPhotosList(): Array<GooglePhotosMediaItem>{
+    fun getPhotosList(): Array<String>{
         var pageToken: String? = null
-        var result = emptyArray<GooglePhotosMediaItem>();
         for (i in 1..3){
             Log.i(javaClass.simpleName,"loading photo list (page: ${i})")
-            val response = fetchPhotosList(pageToken) ?: return result
+            val response = fetchPhotosList(pageToken) ?: return archivedArray
+            var flag = false
+            response.mediaItems.forEach {item ->
+                if (item.filename in archivedArray){
+                    flag = true
+                }else{
+                    archivedArray += item.filename
+                }
+            }
+            if (flag){
+                return archivedArray;
+            }
             pageToken = response.nextPageToken
-            result = merge(result, response.mediaItems)
         }
-        return result
+        return archivedArray
     }
 
     private fun fetchPhotosList(pageToken: String? = null): GooglePhotosSearchResponse?{
